@@ -65,7 +65,7 @@ AutoParry:AddButton({
 	Name = "Auto Parry (Hold Block Button To Spam)",
     Callback = function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/BinxGodteli/Auto-parry-op/main/Op.lua"))()
-    getgenv().SpamSpeed = 1
+    getgenv().SpamSpeed = 25
 loadstring(game:HttpGet("https://raw.githubusercontent.com/BinxGodteli/Auto-parry/main/Op-spam.lua"))()
     local StarterGui = game:GetService("StarterGui")
             StarterGui:SetCore("SendNotification", {

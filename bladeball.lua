@@ -89,43 +89,6 @@ AutoParry:AddToggle({
     end
     })
 
-AutoParry:AddToggle({
-    Name = "Auto TP Parry",
-    Callback = function(Value)
-        if Value then
-            local StarterGui = game:GetService("StarterGui")
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "LDQ HUB",
-                        Text = "Auto TP Parry has been started!",
-                        Duration = 3,
-                    })
-            getgenv().god = true
-while getgenv().god and task.wait() do
-    for _,ball in next, workspace.Balls:GetChildren() do
-        if ball then
-            if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position, ball.Position)
-                if game:GetService("Players").LocalPlayer.Character:FindFirstChild("Highlight") then
-                    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = ball.CFrame * CFrame.new(0, 0, (ball.Velocity).Magnitude * -0.5)
-                    game:GetService("ReplicatedStorage").Remotes.ParryButtonPress:Fire()
-            end
-        end
-    end
-end
-end
-        end
-        if not Value then
-            getgenv().god = false
-            local StarterGui = game:GetService("StarterGui")
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "LDQ HUB",
-                        Text = "Auto TP Parry has been disabled!",
-                        Duration = 3,
-                    })
-                    end
-    end,
-})
-
 local Ability = Window:MakeTab({
 	Name ="Abilities",
 	Icon = "rbxassetid://4483345998",

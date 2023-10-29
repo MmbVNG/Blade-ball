@@ -1333,6 +1333,7 @@ local Other = Misc:AddSection({
 local x2Code = {
     "1BVISITSTHANKS",
     "HALLOWEEN",
+    "HAPPYHALLOWEEN", 
     "3MLIKES"
 }
 

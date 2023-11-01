@@ -1,11 +1,13 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local workspace = game:GetService("Workspace")
 local players = game:GetService("Players")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local localPlayer = players.LocalPlayer
 local BASE_THRESHOLD = 0.2
-local VELOCITY_SCALING_FACTOR_FAST = 0.050
+local VELOCITY_SCALING_FACTOR_FAST = 0.05
 local VELOCITY_SCALING_FACTOR_SLOW = 0.1
 local IMMEDIATE_PARRY_DISTANCE = 11
 local IMMEDIATE_HIGH_VELOCITY_THRESHOLD = 85
@@ -47,14 +49,24 @@ if workspace:FindFirstChild("AbilityThingyk1212") then
         TruValue.Value = "Dash"
 end
 
-local Window = OrionLib:MakeWindow({Name = "LDQ HUB | BLADE BALL", HidePremium = false, SaveConfig = false, ConfigFolder = "OrionTest", IntroText = "LDQ HUB"})
- 
-local AutoParry = Window:MakeTab({
-	Name = "Auto Parry",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+local Window = Fluent:CreateWindow({
+    Title = "LDQ HUB",
+    SubTitle = "by binxgodteli",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
- 
+
+--Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
+local Tabs = {
+    AutoParry = Window:AddTab({ Title = "Auto Parry", Icon = "" }),
+    Ability = Window:AddTab({ Title = "Abilities", Icon = "" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "" })
+}
+
 if character then
     print("Character found | LDQ HUB")
 else
@@ -242,79 +254,129 @@ end
 
 local parryon = false
 local autoparrydistance = 10
+
  
- local Debug = false -- Set this to true if you want my debug output.
+
+local Debug = false -- Set this to true if you want my debug output.
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local Players = game:GetService("Players")
 
+
 local Player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+
 local Remotes = ReplicatedStorage:WaitForChild("Remotes", 9e9) -- A second argument in waitforchild what could it mean?
+
 local Balls = workspace:WaitForChild("Balls", 9e9)
+
 
 -- Functions
 
+
 local function print(...) -- Debug print.
-    if Debug then
-        warn(...)
-    end
+
+        if Debug then
+
+                warn(...)
+
+        end
+
 end
+
 
 local function VerifyBall(Ball) -- Returns nil if the ball isn't a valid projectile; true if it's the right ball.
-    if typeof(Ball) == "Instance" and Ball:IsA("BasePart") and Ball:IsDescendantOf(Balls) and Ball:GetAttribute("realBall") == true then
-        return true
-    end
+
+        if typeof(Ball) == "Instance" and Ball:IsA("BasePart") and Ball:IsDescendantOf(Balls) and Ball:GetAttribute("realBall") == true then
+
+                return true
+
+        end
+
 end
+
 
 local function IsTarget() -- Returns true if we are the current target.
-    return (Player.Character and Player.Character:FindFirstChild("Highlight"))
+
+        return (Player.Character and Player.Character:FindFirstChild("Highlight"))
+
 end
+
 
 local function Parry() -- Parries.
-    Remotes:WaitForChild("ParryButtonPress"):Fire()
+
+        Remotes:WaitForChild("ParryButtonPress"):Fire()
+
 end
+
+
 -- The actual code
 
+
 Balls.ChildAdded:Connect(function(Ball)
-    if not VerifyBall(Ball) then
-        return
-    end
-    
-    print("Ball Spawned: {Ball}")
-    
-    local OldPosition = Ball.Position
-    local OldTick = tick()
-    
-    Ball:GetPropertyChangedSignal("Position"):Connect(function()
-        if IsTarget() then
-            local Distance = (Ball.Position - workspace.CurrentCamera.Focus.Position).Magnitude
-            local Velocity = (OldPosition - Ball.Position).Magnitude 
-            
-            print("Distance: {Distance}\nVelocity: {Velocity}\nTime: {Distance / Velocity}")
+
+        if not VerifyBall(Ball) then
+
+                return
+
+        end
+
         
-            if (Distance / Velocity) <= autoparrydistance then
-                if parryon == true then
-                    Parry()
+
+        print(`Ball Spawned: {Ball}`)
+
+        
+
+        local OldPosition = Ball.Position
+
+        local OldTick = tick()
+
+        
+
+        Ball:GetPropertyChangedSignal("Position"):Connect(function()
+
+                if IsTarget() then -- No need to do the math if we're not being attacked.
+
+                        local Distance = (Ball.Position - workspace.CurrentCamera.Focus.Position).Magnitude
+
+                        local Velocity = (OldPosition - Ball.Position).Magnitude -- Fix for .Velocity not working. Yes I got the lowest possible grade in accuplacer math.
+
+                        
+
+                        print(`Distance: {Distance}\nVelocity: {Velocity}\nTime: {Distance / Velocity}`)
+
+                
+
+                        if (Distance / Velocity) <= autoparrydistance then -- Sorry for the magic number. This just works. No, you don't get a slider for this because it's 2am.
+if parryon == true then
+                                Parry()
+
+                        end
+
                 end
-            end
-        end
-        
-        if (tick() - OldTick >= 1/60) then
-            OldTick = tick()
-            OldPosition = Ball.Position
-        end
-    end)
+
+end
+                
+
+                if (tick() - OldTick >= 1/60) then -- Don't want it to update too quickly because my velocity implementation is aids. Yes, I tried Ball.Velocity. No, it didn't work.
+
+                        OldTick = tick()
+
+                        OldPosition = Ball.Position
+
+                end
+
+        end)
+
 end)
- 
- AutoParry:AddSection({
- 	Name = "Bypass anticheat is active"
- })
- 
-AutoParry:AddToggle({
-	Name = "Auto Parry",
-    Callback = function(Value)
-    if Value then
-            parryon = Value
-            startAutoParry()
+
+local Options = Fluent.Options
+
+local ToggleAutoParry = Tabs.AutoParry:AddToggle("MyToggle", {Title = "Auto Parry", Default = false })
+
+    ToggleAutoParry:OnChanged(function(Value)
+        if Value then
+            parryon = true
             local StarterGui = game:GetService("StarterGui")
             StarterGui:SetCore("SendNotification", {
                 Title = "LDQ HUB",
@@ -322,7 +384,7 @@ AutoParry:AddToggle({
                 Duration = 3,
             })
         else
-            stopAutoParry()
+        parryon = false
             local StarterGui = game:GetService("StarterGui")
             StarterGui:SetCore("SendNotification", {
                 Title = "LDQ HUB",
@@ -330,34 +392,63 @@ AutoParry:AddToggle({
                 Duration = 3,
             })
         end
-    end,
-})
+    end)
 
-AutoParry:AddSlider({
-    Name = "Distance Configuration",
-    Min = 5,
-    Max = 20,
-    Default = 11,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 0.5,
-    ValueName = "Distance",
-    Callback = function(Value)
-        autoparrydistance = Value
-    end,
- })
+    Options.MyToggle:SetValue(false)
 
-AutoParry:AddButton({
-	Name = "Spam (Hold Block Button To Spam)",
-    Callback = function()
-getgenv().SpamSpeed = 25
+local Slider = Tabs.AutoParry:AddSlider("Slider", {
+        Title = "Distance Configuration",
+        Description = "For Auto Parry",
+        Default = 11,
+        Min = 5,
+        Max = 50,
+        Rounding = 0,
+        Callback = function(Value)
+            autoparrydistance = Value
+        end
+    })
+
+Tabs.AutoParry:AddButton({
+        Title = "Spam",
+        Description = "Hold Block Button To Spam",
+        Callback = function()
+        local StarterGui = game:GetService("StarterGui")
+            StarterGui:SetCore("SendNotification", {
+                Title = "LDQ HUB",
+                Text = "Auto Spam has been started!",
+                Duration = 3,
+            })
+           getgenv().SpamSpeed = 25
 loadstring(game:HttpGet("https://raw.githubusercontent.com/BinxGodteli/Auto-parry/main/Op-spam.lua"))()
-end
-})
+        end
+    })
 
-AutoParry:AddToggle({
-    Name = "Auto Farm (need turn on auto parry)",
-    Callback = function(Value)
-        if Value then
+local ToggleAutoParryFarm = Tabs.AutoParry:AddToggle("MyToggle", {Title = "Auto Parry Farm(can't use with Auto Parry)", Default = false })
+
+ToggleAutoParryFarm:OnChanged(function(Value)
+if Value then
+startAutoParry()
+            local StarterGui = game:GetService("StarterGui")
+            StarterGui:SetCore("SendNotification", {
+                Title = "LDQ HUB",
+                Text = "Auto Parry Farm has been started!",
+                Duration = 3,
+            })
+        else
+            stopAutoParry()
+            local StarterGui = game:GetService("StarterGui")
+            StarterGui:SetCore("SendNotification", {
+                Title = "LDQ HUB",
+                Text = "Auto Parry Farm has been disabled!",
+                Duration = 3,
+            })
+        end
+    end)
+
+local ToggleAutoFarm = Tabs.AutoParry:AddToggle("MyToggle", {Title = "Auto Farm (Need Turn On Auto Parry Farm)", Default = false })
+
+ToggleAutoFarm:OnChanged(function(Value)
+if Value then
             local StarterGui = game:GetService("StarterGui")
                     StarterGui:SetCore("SendNotification", {
                         Title = "LDQ HUB",
@@ -385,27 +476,13 @@ end
                         Duration = 3,
                     })
         end
-    end,
-})
-
-local Ability = Window:MakeTab({
-	Name ="Abilities",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-Ability:AddSection({
-	Name = "Lưu ý: Phải chơi xong 1 trận mới dùng được."
-})
-
-Ability:AddSection({
-	Name = "Note: Must complete 1 match to use."
-})
-
-Ability:AddButton({
-    Name = "Dash",
-    Callback = function()
-        local args = {
+    end)
+    
+    Tabs.Ability:AddButton({
+        Title = "Dash",
+        Description = "Note: Must complete 1 match to use.",
+        Callback = function()
+           local args = {
             [1] = "Dash"
         }
         
@@ -450,16 +527,17 @@ Ability:AddButton({
         local StarterGui = game:GetService("StarterGui")
         StarterGui:SetCore("SendNotification", {
             Title = "LDQ HUB",
-            Text = "You got dash ability!",
+            Text = "You got Dash ability!",
             Duration = 3,
         })
     end,
-})
-
-Ability:AddButton({
-    Name = "Phase Bypass",
-    Callback = function()
-        local args = {
+    })
+    
+    Tabs.Ability:AddButton({
+        Title = "Phase Bypass",
+        Description = "Note: Must complete 1 match to use.",
+        Callback = function()
+           local args = {
             [1] = "Phase Bypass"
         }
         
@@ -468,13 +546,14 @@ Ability:AddButton({
         game:GetService("ReplicatedStorage").Remotes.Store.GetOwnedAbilities:InvokeServer()
         
         game:GetService("ReplicatedStorage").Remotes.kebaind:FireServer()
-                    
-        local function AbilityValue2()
+        
+            local function AbilityValue2()
         local TruValue = Instance.new("StringValue")
         workspace:FindFirstChild("AbilityThingyk1212"):Remove()
                 TruValue.Parent = game:GetService("Workspace")
                 TruValue.Name = "AbilityThingyk1212"
                 TruValue.Value = "Phase Bypass"
+        
         end
         
         for i,v in pairs(abilitiesFolder:GetChildren()) do
@@ -503,16 +582,17 @@ Ability:AddButton({
         local StarterGui = game:GetService("StarterGui")
         StarterGui:SetCore("SendNotification", {
             Title = "LDQ HUB",
-            Text = "You got phase bypass ability!",
+            Text = "You got Phase Bypass ability!",
             Duration = 3,
         })
     end,
-})
-
-Ability:AddButton({
-    Name = "Rapture",
-    Callback = function()
-        local args = {
+    })
+    
+    Tabs.Ability:AddButton({
+        Title = "Rapture",
+        Description = "Note: Must complete 1 match to use.",
+        Callback = function()
+           local args = {
             [1] = "Rapture"
         }
         
@@ -521,13 +601,14 @@ Ability:AddButton({
         game:GetService("ReplicatedStorage").Remotes.Store.GetOwnedAbilities:InvokeServer()
         
         game:GetService("ReplicatedStorage").Remotes.kebaind:FireServer()
-                    
-        local function AbilityValue2()
+        
+            local function AbilityValue2()
         local TruValue = Instance.new("StringValue")
         workspace:FindFirstChild("AbilityThingyk1212"):Remove()
                 TruValue.Parent = game:GetService("Workspace")
                 TruValue.Name = "AbilityThingyk1212"
                 TruValue.Value = "Rapture"
+        
         end
         
         for i,v in pairs(abilitiesFolder:GetChildren()) do
@@ -556,14 +637,15 @@ Ability:AddButton({
         local StarterGui = game:GetService("StarterGui")
         StarterGui:SetCore("SendNotification", {
             Title = "LDQ HUB",
-            Text = "You got rapture ability!",
+            Text = "You got Rapture ability!",
             Duration = 3,
         })
     end,
-})
-
-Ability:AddButton({
-    Name = "Reaper",
+    })
+    
+    Tabs.Ability:AddButton({
+    Title = "Reaper",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Reaper"
@@ -614,9 +696,64 @@ Ability:AddButton({
         })
     end,
 })
-
-Ability:AddButton({
-    Name = "Freeze",
+    
+Tabs.Ability:AddButton({
+    Title = "Phantom",
+    Description = "Note: Must complete 1 match to use.",
+    Callback = function()
+        local args = {
+            [1] = "Phantom"
+        }
+        
+        game:GetService("ReplicatedStorage").Remotes.Store.RequestEquipAbility:InvokeServer(unpack(args))
+        
+        game:GetService("ReplicatedStorage").Remotes.Store.GetOwnedAbilities:InvokeServer()
+        
+        game:GetService("ReplicatedStorage").Remotes.kebaind:FireServer()
+                    
+        local function AbilityValue2()
+        local TruValue = Instance.new("StringValue")
+        workspace:FindFirstChild("AbilityThingyk1212"):Remove()
+                TruValue.Parent = game:GetService("Workspace")
+                TruValue.Name = "AbilityThingyk1212"
+                TruValue.Value = "Phantom"
+        end
+        
+        for i,v in pairs(abilitiesFolder:GetChildren()) do
+        
+        
+        for i,b in pairs(abilitiesFolder:GetChildren()) do
+            local Ability = b
+            
+            if v.Enabled == true then
+                local EquippedAbility = v
+                local ChosenAbility = {}
+                spawn(function()
+                ChosenAbility = AbilityValue2()
+            end)
+        
+            task.wait(0.05)
+                local AbilityValue = workspace.AbilityThingyk1212
+                if b.Name == AbilityValue.Value then
+        
+                    v.Enabled = false
+                    b.Enabled = true
+            end
+        end
+        end
+        end
+        local StarterGui = game:GetService("StarterGui")
+        StarterGui:SetCore("SendNotification", {
+            Title = "LDQ HUB",
+            Text = "You got phantom ability!",
+            Duration = 3,
+        })
+    end,
+})    
+    
+Tabs.Ability:AddButton({
+    Title = "Freeze",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Freeze"
@@ -667,9 +804,10 @@ Ability:AddButton({
         })
     end,
 })
-
-Ability:AddButton({
-    Name = "Infinity",
+  
+Tabs.Ability:AddButton({
+    Title = "Infinity",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Infinity"
@@ -721,8 +859,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Waypoint",
+Tabs.Ability:AddButton({
+    Title = "Waypoint",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Waypoint"
@@ -774,8 +913,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Pull",
+Tabs.Ability:AddButton({
+    Title = "Pull",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Pull"
@@ -827,8 +967,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Telekinesis",
+Tabs.Ability:AddButton({
+    Title = "Telekinesis",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Telekinesis"
@@ -880,8 +1021,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Raging Deflect",
+Tabs.Ability:AddButton({
+    Title = "Raging Deflect",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Raging Deflection"
@@ -933,8 +1075,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Swap",
+Tabs.Ability:AddButton({
+    Title = "Swap",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Swap"
@@ -986,8 +1129,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Forcefield",
+Tabs.Ability:AddButton({
+    Title = "Forcefield",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Forcefield"
@@ -1039,8 +1183,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Shadow Step",
+Tabs.Ability:AddButton({
+    Title = "Shadow Step",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Shadow Step"
@@ -1092,8 +1237,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Super Jump",
+Tabs.Ability:AddButton({
+    Title = "Super Jump",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Super Jump"
@@ -1145,8 +1291,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Thunder Dash",
+Tabs.Ability:AddButton({
+    Title = "Thunder Dash",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Thunder Dash"
@@ -1198,8 +1345,9 @@ Ability:AddButton({
     end,
 })
 
-Ability:AddButton({
-    Name = "Wind Cloak",
+Tabs.Ability:AddButton({
+    Title = "Wind Cloak",
+    Description = "Note: Must complete 1 match to use.",
     Callback = function()
         local args = {
             [1] = "Wind Cloak"
@@ -1250,32 +1398,20 @@ Ability:AddButton({
         })
     end,
 })
-
-local Misc = Window:MakeTab({
-	Name = "Misc",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-local Discord = Misc:AddSection({
-	Name = "Server Discord"
-})
-
-Misc:AddButton({
-	Name = "Copy Link Discord Server",
+  
+Tabs.Misc:AddButton({
+	Title = "Copy Link Discord Server",
+	Description = "",
 	Callback = function()
 	setclipboard("https://discord.gg/ppDqYsPUSm")
 	end
 	})
+  
+  local upgrades = localPlayer.Upgrades
 
-Misc:AddSection({
-	Name = "Inf Skill (No CD)"
-})
-
-local upgrades = localPlayer.Upgrades
-
-Misc:AddButton({
-    Name = "Inf Dash",
+Tabs.Misc:AddButton({
+    Title = "Inf Dash",
+    Description = "",
     Callback = function()
         upgrades:WaitForChild("Dash").Value = 999999999999999999
             local StarterGui = game:GetService("StarterGui")
@@ -1287,21 +1423,9 @@ Misc:AddButton({
     end,
 })
 
-Misc:AddButton({
-    Name = "Inf Shadow Step",
-    Callback = function()
-        upgrades:WaitForChild("Shadow Step").Value = 999999999999999999
-            local StarterGui = game:GetService("StarterGui")
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "LDQ HUB",
-                        Text = "You got inf shadow step!",
-                        Duration = 3,
-                    })
-    end,
-})
-
-Misc:AddButton({
-    Name = "Inf Super Jump",
+Tabs.Misc:AddButton({
+    Title = "Inf Super Jump",
+    Description = "",
     Callback = function()
         upgrades:WaitForChild("Super Jump").Value = 999999999999999999
             local StarterGui = game:GetService("StarterGui")
@@ -1313,8 +1437,9 @@ Misc:AddButton({
     end,
 })
 
-Misc:AddButton({
-    Name = "Inf Thunder Dash",
+Tabs.Misc:AddButton({
+    Title = "Inf Thunder Dash",
+    Description = "",
     Callback = function()
         upgrades:WaitForChild("Thunder Dash").Value = 999999999999999999
             local StarterGui = game:GetService("StarterGui")
@@ -1325,20 +1450,17 @@ Misc:AddButton({
                     })
     end,
 })
-
-local Other = Misc:AddSection({
-	Name = "Other"
-})
-
-local x2Code = {
+  
+  local x2Code = {
     "1BVISITSTHANKS",
     "HALLOWEEN",
     "HAPPYHALLOWEEN", 
     "3MLIKES"
 }
 
-Misc:AddButton({
-    Name = "Redeem All Codes",
+Tabs.Misc:AddButton({
+    Title = "Redeem All Codes",
+    Description = "",
     Callback = function()
         function RedeemCode(value)
             game:GetService("ReplicatedStorage").Remotes.SubmitCodeRequest:InvokeServer(value)
@@ -1355,8 +1477,9 @@ Misc:AddButton({
     end,
 })
 
-Misc:AddButton({
-    Name = "Server Hop",
+Tabs.Misc:AddButton({
+    Title = "Server Hop",
+    Description = "",
     Callback = function()
         local StarterGui = game:GetService("StarterGui")
                 StarterGui:SetCore("SendNotification", {
@@ -1427,5 +1550,40 @@ Misc:AddButton({
                                 Teleport()
     end,
 })
+  
+-- Addons:
+-- SaveManager (Allows you to have a configuration system)
+-- InterfaceManager (Allows you to have a interface managment system)
 
-OrionLib:Init()
+-- Hand the library over to our managers
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+-- Ignore keys that are used by ThemeManager.
+-- (we dont want configs to save themes, do we?)
+SaveManager:IgnoreThemeSettings()
+
+-- You can add indexes of elements the save manager should ignore
+SaveManager:SetIgnoreIndexes({})
+
+-- use case for doing it this way:
+-- a script hub could have themes in a global folder
+-- and game configs in a separate folder per game
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "LDQ HUB",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+
+-- You can use the SaveManager:LoadAutoloadConfig() to load a config
+-- which has been marked to be one that auto loads!
+SaveManager:LoadAutoloadConfig()

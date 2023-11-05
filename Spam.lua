@@ -10,7 +10,7 @@ frame.BorderSizePixel = 0
 frame.Parent = gui
 
 local button = Instance.new("TextButton")
-button.Text = "Ligar"
+button.Text = "LDQ HUB"
 button.Size = UDim2.new(1, -20, 1, -20)
 button.Position = UDim2.new(0, 10, 0, 10)
 button.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -25,7 +25,7 @@ local activated = false
 
 local function toggle()
     activated = not activated
-    button.Text = activated and "Spam off" or "Spam on"
+    button.Text = activated and "Spam on" or "Spam off"
     
     while activated do
         local args = {

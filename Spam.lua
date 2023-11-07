@@ -42,7 +42,7 @@ local function toggle()
         }
 
         game:GetService("ReplicatedStorage").Remotes.ParryAttempt:FireServer(unpack(args))
-        game:GetService("RunService").Heartbeat:Wait()
+        game:GetService("RunService").Stepped:Wait()
     end
 end
 

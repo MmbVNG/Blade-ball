@@ -26,7 +26,6 @@ local PlayerGui = localPlayer:WaitForChild("PlayerGui")
 local Hotbar = PlayerGui:WaitForChild("Hotbar")
 local UseRage = false
 
-local uigrad1 = Hotbar.Block.border1.UIGradient
 local uigrad2 = Hotbar.Ability.border2.UIGradient
 
 local function onCharacterAdded(newCharacter)
@@ -174,44 +173,7 @@ local function checkBallDistance()
         task.wait()
     end
 
-    if timeUntilImpact(ball.Velocity, distanceToPlayer, charVel) < getDynamicThreshold(ballVelocityTowardsPlayer) then
-        if (character.Abilities["Raging Deflection"].Enabled or character.Abilities["Rapture"].Enabled) and UseRage == true then
-            if not isCooldownInEffect(uigrad2) then
-                abilityButtonPress:Fire()
-            end
-
-            if isCooldownInEffect(uigrad2) and not isCooldownInEffect(uigrad1) then
-                parryButtonPress:Fire()
-                if notifyparried == true then
-                    local NotificationHolder = loadstring(game:HttpGet("https://raw.githubusercontent.com/BocusLuke/UI/main/STX/Module.Lua"))()
-                    local Notification = loadstring(game:HttpGet("https://raw.githubusercontent.com/BocusLuke/UI/main/STX/Client.Lua"))()
-                    local StarterGui = game:GetService("StarterGui")
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "LDQ HUB",
-                        Text = "Manually Parried Ball!",
-                        Duration = 1,
-                        Icon = "rbxassetid://14467433545"
-                    })
-                end
-            end
-
-        elseif not isCooldownInEffect(uigrad1) then
-            print(isCooldownInEffect(uigrad1))
-            parryButtonPress:Fire()
-            if notifyparried == true then
-                local StarterGui = game:GetService("StarterGui")
-                StarterGui:SetCore("SendNotification", {
-                    Title = "LDQ HUB",
-                    Text = "Automatically Parried Ball!",
-                    Duration = 1,
-                    Icon = "rbxassetid://14467433545"
-                })
-            end
-            task.wait(0.3)
-        end
-    end
-end
-
+    
 
 local function autoParryCoroutine()
     while isRunning do

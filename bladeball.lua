@@ -26,8 +26,6 @@ local PlayerGui = localPlayer:WaitForChild("PlayerGui")
 local Hotbar = PlayerGui:WaitForChild("Hotbar")
 local UseRage = false
 
-local uigrad2 = Hotbar.Ability.border2.UIGradient
-
 local function onCharacterAdded(newCharacter)
     character = newCharacter
     abilitiesFolder = character:WaitForChild("Abilities")
